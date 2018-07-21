@@ -1,23 +1,36 @@
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 data = pd.read_csv('Womens_Clothing_Reviews.csv',header=0)
-
-data = data.rename(columns={list(data)[0] : 'count'})
+data = data.rename(columns={list(data)[0]: 'count'})
 data.head()
-
 data.describe()
 
-dept_vs_rating = data.groupby(['Department Name', 'Rating']).count()
+data.groupby(['Department Name', 'Rating']).count()
 
+sns.countplot(x='Department Name', hue='Rating', data=data)
 
-import seaborn as sns
-
-sns.countplot(x='Department Name', hue='Rating',data=data)
-
-sns.countplot(x='Rating', hue='Recommended IND',data=data)
+sns.countplot(x='Rating', hue='Recommended IND', data=data)
 
 sns.countplot(x='Department Name', hue='Recommended IND',data=data)
 
-# working
-sns.barplot(x='Department Name',y='prop',hue='Recommended IND',data=data['Department Name'].groupby(data['Recommended IND']).value_counts(normalize=True).rename('prop').reset_index())
+# set the text to string
+data['Review Text'] = data['Review Text'].astype(str)
+# how many character in a string
+data['Text_len'] = data['Review Text'].apply(len)
 
+np.average(data['Review Text'].apply(len))
+
+# average text length by rating
+data.groupby(['Rating'])['Text_len'].apply(np.average)
+
+
+# rating 1 and 5 have the lowest average text length, while rating of 3 has the highest average text length
+# one of the explanations is that people who rated 3 actually explained in detail why they rated as 3.
+plt.bar(x=[1,2,3,4,5], height=data.groupby(['Rating'])['Text_len'].apply(np.average))
+sns.boxplot(x='Rating', y='Text_len',data=data)
+
+# the average age of each Rating group is close to each other.
+sns.boxplot(x='Rating', y='Age', data=data)
