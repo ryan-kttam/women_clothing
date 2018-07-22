@@ -34,3 +34,21 @@ sns.boxplot(x='Rating', y='Text_len',data=data)
 
 # the average age of each Rating group is close to each other.
 sns.boxplot(x='Rating', y='Age', data=data)
+
+import nltk
+# use nltk.download() to download all packages if needed
+
+# counting word frequency
+text = " ".join(data['Review Text']).split()
+freq = nltk.FreqDist(text)
+
+# removing the stop words
+# Note that nltk stopwords do not include 'I', therefore I manually remove the 'I'
+from nltk.corpus import stopwords
+sw = stopwords.words('english')
+for item in list(freq): # for python 2: can use freq.keys()
+    if item in sw or item == 'I':
+        freq.pop(item, None)
+
+# plotting the frequency of top 20 words
+freq.plot(20)
