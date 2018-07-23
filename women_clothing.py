@@ -52,3 +52,57 @@ for item in list(freq): # for python 2: can use freq.keys()
 
 # plotting the frequency of top 20 words
 freq.plot(20)
+
+# implementing sentiment analysis
+# SentimentIntensityAnalyzer's output has 4 scores:
+# neg: Negative, neu: Neutral, pos: Positive, and compound: aggregated score
+#
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+pos = 0
+neg = 0
+neu = 0
+m1 = SentimentIntensityAnalyzer()
+for sentence in data['Review Text']:
+    pos += m1.polarity_scores(sentence)['pos']
+    neg += m1.polarity_scores(sentence)['neg']
+    neu += m1.polarity_scores(sentence)['neu']
+
+# alternative way: select the max score
+pos = 0
+neg = 0
+neu = 0
+for sentence in data['Review Text']:
+    if m1.polarity_scores(sentence)['neu'] >= m1.polarity_scores(sentence)['neg'] and m1.polarity_scores(sentence)['neu'] >= m1.polarity_scores(sentence)['pos']:
+        neu += 1
+    elif m1.polarity_scores(sentence)['pos'] == m1.polarity_scores(sentence)['neg']:
+        neu += 1
+    elif m1.polarity_scores(sentence)['pos'] > m1.polarity_scores(sentence)['neg']:
+        pos += 1
+    elif m1.polarity_scores(sentence)['neg'] > m1.polarity_scores(sentence)['pos']:
+        neg += 1
+
+pos
+neg
+neu
+sum([pos,neg,neu])
+
+
+
+
+a = 'I love this movie'
+b = "I hate it, but I like how you walk"
+c = [a, b]
+m1 = SentimentIntensityAnalyzer()
+m1.polarity_scores(b)['pos']
+m1.score_valence()
+
+pos = 0
+neg = 0
+neu = 0
+for i in c:
+    print (i)
+    pos += m1.polarity_scores(i)['pos']
+    neg += m1.polarity_scores(i)['neg']
+    neu += m1.polarity_scores(i)['neu']
+
+
