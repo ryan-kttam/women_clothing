@@ -38,25 +38,31 @@ sns.boxplot(x='Rating', y='Age', data=data)
 import nltk
 # use nltk.download() to download all packages if needed
 
-# counting word frequency
-text = " ".join(data['Review Text']).split()
-freq = nltk.FreqDist(text)
-
-# removing the stop words
-# Note that nltk stopwords do not include 'I', therefore I manually remove the 'I'
+# tokenizing text
+from nltk.tokenize import word_tokenize
+from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
+# implementing stop words
 sw = stopwords.words('english')
-for item in list(freq): # for python 2: can use freq.keys()
-    if item in sw or item == 'I':
-        freq.pop(item, None)
+# Stemming means removing affixes (suffix/ prefix) from words and returning the root word. (detailed explanation below)
+stemmer = PorterStemmer()
+text = " ".join(data['Review Text'])
+tokens = word_tokenize(text)
+new_tokens = []
+for word in tokens:
+    if len(word) <= 2 or word in sw:
+        continue
+    new_tokens.append(stemmer.stem(word))
 
+
+# counting word frequency
 # plotting the frequency of top 20 words
+freq = nltk.FreqDist(new_tokens)
 freq.plot(20)
 
 # implementing sentiment analysis
 # SentimentIntensityAnalyzer's output has 4 scores:
 # neg: Negative, neu: Neutral, pos: Positive, and compound: aggregated score
-#
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 pos = 0
 neg = 0
@@ -89,20 +95,22 @@ sum([pos,neg,neu])
 
 
 
-a = 'I love this movie'
-b = "I hate it, but I like how you walk"
-c = [a, b]
-m1 = SentimentIntensityAnalyzer()
-m1.polarity_scores(b)['pos']
-m1.score_valence()
 
-pos = 0
-neg = 0
-neu = 0
-for i in c:
-    print (i)
-    pos += m1.polarity_scores(i)['pos']
-    neg += m1.polarity_scores(i)['neg']
-    neu += m1.polarity_scores(i)['neu']
+
+# --------------------------------------
+# Stemming vs Lemmatizing
+# Stemming means removing affixes (suffix/ prefix) from words and returning the root word.
+# However, Stemming might delete some characters that were not suppose to, ex. increases
+# Lemmatizing can solve such issue:
+# Stemming:
+# from nltk.stem import PorterStemmer
+# stemmer = PorterStemmer()
+# print(stemmer.stem('working'))
+# lemmatizing words
+from nltk.stem import WordNetLemmatizer
+lem = WordNetLemmatizer()
+lem.lemmatize('this')
+
+
 
 
