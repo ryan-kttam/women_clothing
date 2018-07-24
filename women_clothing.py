@@ -93,7 +93,34 @@ neu
 sum([pos,neg,neu])
 
 
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer # Term Frequency times inverse document freq
+vector = CountVectorizer()
+vector2 = TfidfTransformer()
+training = vector.fit_transform(data['Review Text'])
+training2 = vector2.fit_transform(training)
 
+training.shape
+
+training.shape
+training2.shape
+data['Rating']
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+train_x, test_x, train_y, test_y = train_test_split(training2, data['Rating'], test_size=0.25)
+base_model = MultinomialNB().fit(train_x, train_y)
+
+actual = list(test_y)
+prediction = base_model.predict(test_x)
+i = 0
+result = 0
+while i < len(actual):
+    if prediction[i] == actual[i]:
+        result += 1
+    i += 1
+
+print('Accuracy of predicting Rating is: ', np.round(result*100.0 / len(prediction), 2), '%')
 
 
 
