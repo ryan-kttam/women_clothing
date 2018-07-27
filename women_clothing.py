@@ -101,29 +101,40 @@ vector2 = TfidfTransformer()
 training = vector.fit_transform(data['Review Text'])
 training2 = vector2.fit_transform(training)
 
-training.shape
+pd.DataFrame(training2)
+pd.concat([data['Recommended IND'], training2], axis=1)
 
 training.shape
 training2.shape
 data['Rating']
 
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-train_x, test_x, train_y, test_y = train_test_split(training2, data['Rating'], test_size=0.25)
-base_model = MultinomialNB().fit(train_x, train_y)
 
+train_x, test_x, train_y, test_y = train_test_split(training2, data['Rating'], test_size=0.25)
+
+base_model = MultinomialNB().fit(train_x, train_y)
+alter_model = SVC().fit(train_x, train_y)
+alter_model2 = RandomForestClassifier(n_estimators=500).fit(train_x, train_y)
+
+# Randomforest performed slightly better than SVM and Naive Bayes.
 actual = list(test_y)
 prediction = base_model.predict(test_x)
+prediction2 = alter_model2.predict(test_x)
 i = 0
 result = 0
 while i < len(actual):
-    if prediction[i] == actual[i]:
+    if prediction2[i] == actual[i]:
         result += 1
     i += 1
 
-print('Accuracy of predicting Rating is: ', np.round(result*100.0 / len(prediction), 2), '%')
+print('Accuracy of predicting Rating is: ', np.round(result*100.0 / len(prediction2), 2), '%')
 
+from scipy.sparse import coo_matrix, hstack
 
+hstack(training2)
 
 # --------------------------------------
 # Stemming vs Lemmatizing
