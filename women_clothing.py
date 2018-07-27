@@ -3,36 +3,37 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-data = pd.read_csv('Womens_Clothing_Reviews.csv',header=0)
+# loading Data
+data = pd.read_csv('Womens_Clothing_Reviews.csv', header=0)
 data = data.rename(columns={list(data)[0]: 'count'})
-data.head()
-data.describe()
 
+
+# Data exploration,
 data.groupby(['Department Name', 'Rating']).count()
 
+# te most popular clothing department is "Top", followed by "Dresses"
+# This company did a decent job on keeping customers rating, as Rating counts decrease gradually as rating decrease
 sns.countplot(x='Department Name', hue='Rating', data=data)
-
 sns.countplot(x='Rating', hue='Recommended IND', data=data)
-
 sns.countplot(x='Department Name', hue='Recommended IND',data=data)
 
-# set the text to string
+
+# Customer review (text) analysis
+# Setting the text to string
 data['Review Text'] = data['Review Text'].astype(str)
-# how many character in a string
+# storing how many character in a string
 data['Text_len'] = data['Review Text'].apply(len)
 
-np.average(data['Review Text'].apply(len))
 
 # average text length by rating
-data.groupby(['Rating'])['Text_len'].apply(np.average)
-
-
 # rating 1 and 5 have the lowest average text length, while rating of 3 has the highest average text length
 # one of the explanations is that people who rated 3 actually explained in detail why they rated as 3.
-plt.bar(x=[1,2,3,4,5], height=data.groupby(['Rating'])['Text_len'].apply(np.average))
-sns.boxplot(x='Rating', y='Text_len',data=data)
+data.groupby(['Rating'])['Text_len'].apply(np.average)
+plt.bar(x=[1, 2, 3, 4, 5], height=data.groupby(['Rating'])['Text_len'].apply(np.average))
+sns.boxplot(x='Rating', y='Text_len', data=data)
 
-# the average age of each Rating group is close to each other.
+# The average age of each Rating group is close to each other.
+# Age does not seem to be a significant factor in predicting ratings
 sns.boxplot(x='Rating', y='Age', data=data)
 
 import nltk
