@@ -2,6 +2,17 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer # Term Frequency times inverse document freq
 
 # loading Data
 data = pd.read_csv('Womens_Clothing_Reviews.csv', header=0)
@@ -36,13 +47,11 @@ sns.boxplot(x='Rating', y='Text_len', data=data)
 # Age does not seem to be a significant factor in predicting ratings
 sns.boxplot(x='Rating', y='Age', data=data)
 
-import nltk
+
 # use nltk.download() to download all packages if needed
 
 # tokenizing text
-from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
+
 # implementing stop words
 sw = stopwords.words('english')
 # Stemming means removing affixes (suffix/ prefix) from words and returning the root word. (detailed explanation below)
@@ -64,7 +73,7 @@ freq.plot(20)
 # implementing sentiment analysis
 # SentimentIntensityAnalyzer's output has 4 scores:
 # neg: Negative, neu: Neutral, pos: Positive, and compound: aggregated score
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 pos = 0
 neg = 0
 neu = 0
@@ -91,11 +100,9 @@ for sentence in data['Review Text']:
 pos
 neg
 neu
-sum([pos,neg,neu])
+sum([pos, neg, neu])
 
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer # Term Frequency times inverse document freq
 vector = CountVectorizer()
 vector2 = TfidfTransformer()
 training = vector.fit_transform(data['Review Text'])
@@ -108,16 +115,23 @@ training.shape
 training2.shape
 data['Rating']
 
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-
 train_x, test_x, train_y, test_y = train_test_split(training2, data['Rating'], test_size=0.25)
 
 base_model = MultinomialNB().fit(train_x, train_y)
 alter_model = SVC().fit(train_x, train_y)
 alter_model2 = RandomForestClassifier(n_estimators=500).fit(train_x, train_y)
+
+def performance (train_x, test_x,train_y, test_y,  model):
+    actual = list(test_y)
+    train_model = model.fit(train_x, train_y)
+    prediction = train_model.predict(test_x)
+    i = 0
+    result = 0
+    while i < len(actual):
+        if prediction[i] == actual[i]:
+            result += 1
+        i += 1
+    print('prediction Accuracy is: ', np.round(result * 100.0 / len(prediction), 2), '%')
 
 # Randomforest performed slightly better than SVM and Naive Bayes.
 actual = list(test_y)
@@ -135,6 +149,14 @@ print('Accuracy of predicting Rating is: ', np.round(result*100.0 / len(predicti
 from scipy.sparse import coo_matrix, hstack
 
 hstack(training2)
+
+# Building a supervised learning model to predict whether a product will be recommended by a customer based on its text reivew
+
+train_x, test_x, train_y, test_y = train_test_split(training2, data['Recommended IND'], test_size=0.25)
+
+# Using SVM, the accuracy of predicting whether a product will be recommended by a customer based on its text reivew is aounrd 82%
+performance(train_x, test_x, train_y, test_y, SVC())
+
 
 # --------------------------------------
 # Stemming vs Lemmatizing
