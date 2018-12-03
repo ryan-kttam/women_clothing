@@ -20,7 +20,7 @@ data = pd.read_csv('C:/Github/women_clothing/Womens_Clothing_Reviews.csv', heade
 data = data.rename(columns={list(data)[0]: 'count'})
 len(data) # there are 23486 reviews
 data.head(2)
-print ('Column Name: '+ str(list(data)))
+list(data)
 # Data exploration,
 
 # te most popular clothing department is "Top", followed by "Dresses"
@@ -115,10 +115,9 @@ for rating, rating_text in data.groupby('Rating')['Review Text']:
         pos += m1.polarity_scores(i)['pos']
         neg += m1.polarity_scores(i)['neg']
         neu += m1.polarity_scores(i)['neu']
-
-rating_length = len(rating_text)
-result = [neg, neu, pos]
-sentiment[rating] = list(map(lambda x: x/rating_length, result))
+    rating_length = len(rating_text)
+    result = [neg, neu, pos]
+    sentiment[rating] = list(map(lambda x: x/rating_length, result))
 
 sentiment.keys()
 neg_values = [i[0] for i in sentiment.values()]
@@ -131,7 +130,7 @@ plot_pos = plt.bar(sentiment.keys(), pos_values, bottom=[a+b for a, b in zip(neg
 plt.legend((plot_neg[0], plot_neu[0], plot_pos[0]), ('Negative', 'Neutral','Positive'), loc='right')
 plt.ylabel('Percentage')
 plt.xlabel('Rating')
-plt.title('Sentiment Value by Ratings', size=15)
+plt.title('Sentiment Percentage by Rating', size=15)
 plt.show()
 
 # https://medium.com/…/more-nlp-with-sklearns-countvectorizer…
@@ -139,63 +138,41 @@ plt.show()
 
 import string
 def clean_mess(text):
-step1 = [i for i in text if i not in string.punctuation]
-step2 = ''.join(step1)
-step3 = [i for i in step2.split() if i.lower() not in sw]
-return step3
+    step1 = [i for i in text if i not in string.punctuation]
+    step2 = ''.join(step1)
+    step3 = [i for i in step2.split() if i.lower() not in sw]
+    return step3
 a = ['seuwoenfe. wenruiw', 'We just hung onto each other. You couldnt even stand, Sheila Bailey']
 clean_mess(a[1])
 
-vector = CountVectorizer(stop_words=sw,
-#ngram_range=(1,3),
-min_df=9,
-analyzer=clean_mess) # can apply stopword, tokenizer etc.
+vector = CountVectorizer(stop_words=sw, ngram_range=(1,3),
+                         min_df=9,
+                         analyzer=clean_mess) # can apply stopword, tokenizer etc.
 vector2 = TfidfTransformer()
 training = vector.fit_transform(data['Review Text'])
 training2 = vector2.fit_transform(training)
 
 train_x, test_x, train_y, test_y = train_test_split(training2, data['Rating'], test_size=0.25)
 
-base_model = MultinomialNB().fit(train_x, train_y)
-alter_model = SVC().fit(train_x, train_y)
-alter_model2 = RandomForestClassifier(n_estimators=500).fit(train_x, train_y)
-
 def performance (train_x, test_x,train_y, test_y, model):
-actual = list(test_y)
-train_model = model.fit(train_x, train_y)
-prediction = train_model.predict(test_x)
-i = 0
-result = 0
-while i < len(actual):
-if prediction[i] == actual[i]:
-result += 1
-i += 1
-print('prediction Accuracy is: ', np.round(result * 100.0 / len(prediction), 2), '%')
+    actual = list(test_y)
+    train_model = model.fit(train_x, train_y)
+    prediction = train_model.predict(test_x)
+    i = 0
+    result = 0
+    while i < len(actual):
+        if prediction[i] == actual[i]:
+            result += 1
+        i += 1
+    print('prediction Accuracy is: ', np.round(result * 100.0 / len(prediction), 2), '%')
 
 # Randomforest performed slightly better than SVM and Naive Bayes.
-actual = list(test_y)
-prediction = base_model.predict(test_x)
-prediction2 = alter_model2.predict(test_x)
-i = 0
-result = 0
-while i < len(actual):
-if prediction[i] == actual[i]:
-result += 1
-i += 1
 
 print('Accuracy of predicting Rating is: ', np.round(result*100.0 / len(prediction), 2), '%')
 
-from scipy.sparse import coo_matrix, hstack
-
-hstack(training2)
-
-# Building a supervised learning model to predict whether a product will be recommended by a customer based on its text reivew
-
-train_x, test_x, train_y, test_y = train_test_split(training2, data['Recommended IND'], test_size=0.25)
-
-# Using SVM, the accuracy of predicting whether a product will be recommended by a customer based on its text reivew is aounrd 82%
 performance(train_x, test_x, train_y, test_y, MultinomialNB())
 performance(train_x, test_x, train_y, test_y, SVC())
+performance(train_x, test_x, train_y, test_y, RandomForestClassifier(n_estimators=200))
 
 # --------------------------------------
 # Stemming vs Lemmatizing
@@ -210,3 +187,4 @@ performance(train_x, test_x, train_y, test_y, SVC())
 from nltk.stem import WordNetLemmatizer
 lem = WordNetLemmatizer()
 lem.lemmatize('this')
+
